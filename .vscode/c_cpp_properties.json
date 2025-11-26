@@ -1,0 +1,26 @@
+{
+  "configurations": [
+    {
+      "name": "Linux",
+      "includePath": [
+        // Componentes del SDK de TuyaOpen
+        "/home/tuya/TuyaOpen/src/**",
+        "/home/tuya/TuyaOpen/src/tal_system/include/*",
+        "/home/tuya/TuyaOpen/platform/ESP32/esp-idf/components/**",
+        "/home/tuya/TuyaOpen/platform/ESP32/tuya_open_sdk/**",
+        
+        // Tu código de la app
+        "/home/tuya/projects/caldera/**",
+        "/home/tuya/projects/caldera/components/**",
+        
+
+      ],
+      "defines": ["CONFIG_IDF_TARGET_ESP32"],
+      "compilerPath": "/usr/bin/clang-20",
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "linux-gcc-x64"
+    }
+  ],
+  "version": 4
+}

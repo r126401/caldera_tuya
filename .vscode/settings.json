@@ -1,0 +1,45 @@
+{
+  "files.associations": {
+    "*.c": "c",
+    "*.h": "c",
+    "esp_log.h": "c"
+  },
+  "terminal.integrated.env.linux": {
+    "PATH": "${env:PATH}:~/.local/bin"
+  },
+  "tuya.espIdfPath": "${workspaceFolder}/platform/ESP32/esp-idf",
+  "idf.enableTelemetry": false,
+  "cmake.configureOnOpen": false,
+  "cmake.enableCMakeToolsIntegration": false,
+  "C_Cpp.default.configurationProvider": "ms-vscode.cpptools",
+  "terminal.integrated.profiles.linux": {
+    "bash_with_idf": {
+      "path": "/bin/bash",
+      "args": ["-i", "-c", "source ${workspaceFolder}/platform/ESP32/esp-idf/export.sh; exec bash"]
+    }
+  },
+  "terminal.integrated.defaultProfile.linux": "bash_with_idf",
+  "VsCodeTaskButtons.showCounter": true,
+  "VsCodeTaskButtons.tasks": [
+    {
+      "label": "Build",
+      "task": "tuya: build",
+      "color": "error"
+    },
+    {
+      "label": "Clean",
+      "task": "tuya: clean",
+      "color": "warning"
+    },
+    {
+      "label": "Flash",
+      "task": "tuya: flash",
+      "color": "default"
+    },
+    {
+      "label": "Monitor",
+      "task": "tuya: monitor",
+      "color": "default"
+    }
+  ]
+}

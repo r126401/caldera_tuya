@@ -1,0 +1,28 @@
+{
+  "buttons": [
+    {
+      "name": "Build",
+      "task": "tuya: build",
+      "icon": "🔨",
+      "tooltip": "Build the project"
+    },
+    {
+      "name": "clean",
+      "task": "tuya: clean",
+      "icon": "🧪",
+      "tooltip": "Run tests"
+    },
+        {
+      "name": "monitor",
+      "task": "tuya: monitor",
+      "icon": "🚀",
+      "tooltip": "Run tests"
+    },
+
+    {
+      "name": "Flash",
+      "task": "tuya: flash",
+      "icon": "▶️"
+    }
+  ]
+}
