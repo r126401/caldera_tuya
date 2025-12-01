@@ -14,6 +14,12 @@
 #include "esp_rom_sys.h"
 #include "esp_log.h"
 
+#include "tuya_config.h"
+
+
+
+
+
 
 #define ONEWIRE_MAX_DS18B20 1
 #define CONFIG_SENSOR_THERMOSTAT_GPIO 17
@@ -213,7 +219,8 @@ static float redondear_temperatura(float temperatura) {
 static esp_err_t read_temperature(float *temperature_metered) 
 
 {
-	esp_err_t error; 
+	esp_err_t error;
+    int value_dp; 
 
 	if (ds18b20_trigger_temperature_conversion(*ds18b20s) != ESP_OK) {
 		ESP_LOGE(TAG, "Error al hacer la conversion de temperatura");
@@ -278,6 +285,7 @@ static void task_iotThermostat()
 	char* id_sensor;
 	static uint8_t n_errors = 0;
 	float current_temperature;
+    int value_dp;
 	//event_lcd_t event;
 	//event.event_type = UPDATE_TEMPERATURE;
 
@@ -302,6 +310,11 @@ static void task_iotThermostat()
         if (error == ESP_OK) {
 
             //set_lcd_update_temperature(current_temperature);
+            value_dp = (int) (current_temperature*10);
+            ESP_LOGI(TAG, "El resultado del envio del dp ha sido %d, y la temperatura: %d", error, value_dp);
+            error = send_value_dp(CURRENT_TEMPERATURE, value_dp);
+        
+
             ESP_LOGI(TAG, "Enviada la temperatura al display");
              esp_rom_delay_us(30000 * 1000);
            

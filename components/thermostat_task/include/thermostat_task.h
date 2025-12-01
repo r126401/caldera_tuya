@@ -1,3 +1,6 @@
+
+
+
 void create_task_thermostat();
 
 typedef enum STATUS_RELAY {
@@ -26,4 +29,6 @@ typedef enum THERMOSTAT_MODE {
     MODE_ERROR
 
 } THERMOSTAT_MODE;
+
+
 

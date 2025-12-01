@@ -41,4 +41,18 @@
 
 // clang-format on
 
+
+
+typedef enum DP_THERMOSTAT {
+
+    SWITCH = 1,
+    MODE = 2,
+    SET_TEMPERATURE = 3,
+    CURRENT_TEMPERATURE = 24,
+    TEMPERATURE_CORRECTION = 27
+
+} DP_THERMOSTAT;
+
+int send_value_dp(DP_THERMOSTAT dp, int value);
+
 #endif

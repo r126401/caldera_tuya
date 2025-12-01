@@ -220,7 +220,7 @@ void user_main(void)
 
     //! open iot development kit runtim init
     cJSON_InitHooks(&(cJSON_Hooks){.malloc_fn = tal_malloc, .free_fn = tal_free});
-    tal_log_init(TAL_LOG_LEVEL_INFO, 1024, (TAL_LOG_OUTPUT_CB)tkl_log_output);
+    tal_log_init(TAL_LOG_LEVEL_DEBUG, 1024, (TAL_LOG_OUTPUT_CB)tkl_log_output);
     PR_DEBUG("Comenzamos el programa");
 
     PR_NOTICE("Application information:");
@@ -332,5 +332,24 @@ void tuya_app_main(void)
 else {
     PR_INFO("Thread tuya_app_main creado OK");
 }
+
+}
+
+
+int send_value_dp(DP_THERMOSTAT dp, int value) {
+
+    dp_obj_t obj;
+    int error;
+
+    obj.type = PROP_VALUE;
+    obj.value.dp_value = value;
+    obj.id = dp;
+    obj.time_stamp = tal_time_get_sum_time_posix();
+
+    error = tuya_iot_dp_obj_report(&client, tuya_iot_devid_get(&client),  &obj, 1, 0);
+
+    PR_INFO("main", "El resultado de la operacion ha sido %d", error);
+
+    return error;
 
 }
