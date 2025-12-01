@@ -41,5 +41,6 @@
       "task": "tuya: monitor",
       "color": "default"
     }
-  ]
+  ],
+  "C_Cpp.errorSquiggles": "enabled"
 }
