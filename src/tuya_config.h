@@ -55,4 +55,11 @@ typedef enum DP_THERMOSTAT {
 
 int send_value_dp(DP_THERMOSTAT dp, int value);
 
+
+//default values thermostat
+#define default_calibrated -3.5
+#define default_threshold 21.5
+#define default_margin_temperature 0.5
+
+
 #endif
