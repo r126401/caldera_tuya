@@ -11,7 +11,8 @@
         
         // Tu código de la app
         "/home/tuya/projects/caldera/**",
-        "/home/tuya/projects/caldera/components/**"
+        "/home/tuya/projects/caldera/components/**",
+        "/home/tuya/projects/caldera/components/rgb_task/**"
         
 
       ],
