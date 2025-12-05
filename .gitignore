@@ -1,2 +1,5 @@
 .vscode.old/
 .build/
+dist
+monitor.log
+

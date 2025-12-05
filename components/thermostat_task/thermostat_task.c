@@ -303,8 +303,6 @@ static void task_iotThermostat()
 
     while (1) {
 
-        		
-
         ESP_LOGI(TAG, " Leemos temperatura en local");
         error = reading_local_temperature(&current_temperature);
         if (error == ESP_OK) {
