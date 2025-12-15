@@ -42,5 +42,13 @@
       "color": "default"
     }
   ],
-  "C_Cpp.errorSquiggles": "enabled"
+  "C_Cpp.errorSquiggles": "enabled",
+
+  // ---- AÑADIDO SOLO PARA INTELLISENSE ----
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/TuyaOpen/platform/ESP32/tuya_open_sdk/build/compile_commands.json",
+  "C_Cpp.default.intelliSenseMode": "gcc-x64",
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/**",
+    "${workspaceFolder}/.vscode"
+  ]
 }

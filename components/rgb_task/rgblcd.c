@@ -17,6 +17,8 @@
 #include "driver/gpio.h"
 #include "esp_err.h"
 #include "esp_log.h"
+#include "multi_heap.h"
+#include "esp_heap_caps.h"
 #include "lvgl.h"
 #include "lv_main_thermostat.h"
 #include "lv_factory_thermostat.h"
@@ -29,7 +31,7 @@
 #include <freertos/task.h>
 #include <freertos/queue.h>
 #include "events_lcd.h"
-
+extern EventGroupHandle_t evt_between_task;
 
 #define	I2C_HOST	0
 esp_lcd_touch_handle_t tp = NULL;
@@ -58,7 +60,7 @@ static const char *TAG = "rgblcd";
 #if CONFIG_DOUBLE_FB
 #define EXAMPLE_LCD_NUM_FB             2
 #else
-#define EXAMPLE_LCD_NUM_FB             1
+#define EXAMPLE_LCD_NUM_FB             2
 #endif // CONFIG_EXAMPLE_USE_DOUBLE_FB
 
 
@@ -140,12 +142,14 @@ static void lvgl_port_task(void *arg)
     ESP_LOGI(TAG, "Starting LVGL task");
     uint32_t time_till_next_ms = 0;
     
-	event_queue = xQueueCreate(5, sizeof(event_lcd_t));
+	//event_queue = xQueueCreate(5, sizeof(event_lcd_t));
+    //xEventGroupSetBits(evt_between_task, EVT_TUYA_TASK);
+    
 
     while (1) {
         _lock_acquire(&lvgl_api_lock);
         time_till_next_ms = lv_timer_handler();
-        wait_event_lcd();
+        //wait_event_lcd();
         _lock_release(&lvgl_api_lock);
 
         // in case of task watch dog timeout, set the minimal delay to 10ms
@@ -167,6 +171,10 @@ static void set_lcd_backlight(uint32_t level)
 
 void init_lcdrgb(void)
 {
+
+    ESP_LOGI(TAG, "Esperando para arrancar rgb");
+    //xEventGroupWaitBits(evt_between_task, EVT_RGB_TASK, pdFALSE, pdTRUE, portMAX_DELAY);
+    ESP_LOGI(TAG, "RGB ARRANCADO");
 
     init_gpios_app();
     set_lcd_backlight(LCD_BK_LIGHT_OFF_LEVEL);
@@ -259,8 +267,10 @@ void init_lcdrgb(void)
     ESP_LOGI(TAG, "Allocate LVGL draw buffers");
     // it's recommended to allocate the draw buffer from internal memory, for better performance
     size_t draw_buffer_sz = CONFIG_LCD_H_RES * EXAMPLE_LVGL_DRAW_BUF_LINES * EXAMPLE_PIXEL_SIZE;
+    ESP_LOGI(TAG, "Reservamos %d", draw_buffer_sz);
     buf1 = heap_caps_malloc(draw_buffer_sz, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     assert(buf1);
+    ESP_LOGI(TAG, "Reservado %d", CONFIG_LCD_H_RES * EXAMPLE_LVGL_DRAW_BUF_LINES * EXAMPLE_PIXEL_SIZE);
     // set LVGL draw buffers and partial mode
     lv_display_set_buffers(display, buf1, buf2, draw_buffer_sz, LV_DISPLAY_RENDER_MODE_PARTIAL);
 #endif // CONFIG_EXAMPLE_USE_DOUBLE_FB
@@ -284,13 +294,21 @@ void init_lcdrgb(void)
     ESP_ERROR_CHECK(esp_timer_create(&lvgl_tick_timer_args, &lvgl_tick_timer));
     ESP_ERROR_CHECK(esp_timer_start_periodic(lvgl_tick_timer, EXAMPLE_LVGL_TICK_PERIOD_MS * 1000));
 
+    ESP_LOGI(TAG, "vamos a crear la tarea lvgl");
 
-    xTaskCreatePinnedToCore(lvgl_port_task, "LVGL", CONFIG_RESOURCE_LCD_TASK, NULL, EXAMPLE_LVGL_TASK_PRIORITY, NULL,1);
+    multi_heap_info_t info;
+    heap_caps_get_info(&info, MALLOC_CAP_DEFAULT);
+    ESP_LOGI(TAG, "FREE DRAM: %u bytes\n", info.total_free_bytes);
+    xTaskCreate(lvgl_port_task, "LVGL", 1024*8, NULL, EXAMPLE_LVGL_TASK_PRIORITY, NULL);
+
+    heap_caps_get_info(&info, MALLOC_CAP_DEFAULT);
+    ESP_LOGI(TAG, "FREE DRAM: %u bytes\n", info.total_free_bytes);
 
     // Lock the mutex due to the LVGL APIs are not thread-safe
     _lock_acquire(&lvgl_api_lock);
     create_main_thermostat(display);
     init_app_touch_xpt2046(display);
+    xEventGroupSetBits(evt_between_task, EVT_TUYA_TASK);
     timing_backlight();
 
     _lock_release(&lvgl_api_lock);

@@ -9,7 +9,6 @@
 #include "esp_log.h"
 //#include "app_main.h"
 #include "events_app.h"
-#include "schedule_app.h"
 #include "events_lcd.h"
 #include "esp_app_desc.h"
 
@@ -71,7 +70,7 @@ bool pulse = false;
 lv_timer_t *mytimer;
 
 extern char *text_qrcode;
-extern float current_threshold;
+//extern float current_threshold;
 static const char *TAG = "lv_main_thermostat";
 
 
@@ -100,10 +99,10 @@ extern lv_display_t * display;
 int lv_update_lcd_schedule(bool status) {
 
 
-    int index;
-    uint32_t hour;
-    index = get_next_schedule(&hour);
-    set_lcd_update_schedule(status, hour, index);
+    int index=0;
+    //uint32_t hour;
+    //index = get_next_schedule(&hour);
+    //set_lcd_update_schedule(status, hour, index);
     return index;
 
 }
@@ -197,7 +196,7 @@ void create_layout_threshold() {
 	lv_image_set_src(icon_threshold, &ic_threshold);
 	text_threshold = lv_label_create(layout_threshold);
 	lv_obj_align_to(text_threshold, icon_threshold, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
-    lv_update_threshold_temperature(current_threshold);
+    //lv_update_threshold_temperature(current_threshold);
 	//lv_obj_set_pos(text_threshold, 20, 10);
     //lv_label_set_text(text_threshold, "25.1 ºC");
 	lv_obj_set_size(layout_threshold, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
@@ -539,7 +538,7 @@ static void event_handler_button_main_reset(lv_event_t *event) {
      * Rutina para tratar el reset del dispositivo
      */
 
-    reset_device();
+    //reset_device();
   
 }
 
@@ -550,7 +549,7 @@ static void event_handler_button_factory_reset(lv_event_t *event) {
      * Rutina para tratar el reset del dispositivo
      */
 
-    factory_reset_device();
+    //factory_reset_device();
   
 }
 
@@ -654,9 +653,9 @@ void create_warning_icon() {
 
 static void lv_event_handler_button_instalation(lv_event_t *e) {
 
-    remove_task_thermostat();
+    //remove_task_thermostat();
 
-    create_factory_screen();
+    //create_factory_screen();
 }
 
 
@@ -715,7 +714,7 @@ void lv_create_device_name() {
     lv_obj_t *lv_name_device = lv_label_create(screen_main_thermostat);
     lv_obj_set_pos(lv_name_device,70,5);
     //lv_obj_align_to(lv_name_device, button_main_reset, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
-    lv_label_set_text(lv_name_device, get_device_name());
+    //lv_label_set_text(lv_name_device, get_device_name());
 }
 
 
@@ -728,10 +727,9 @@ void create_main_thermostat() {
     set_style_layout_notification();
     
     create_layout_notification();
-    create_layout_temperature();
+/*    create_layout_temperature();
     create_layout_threshold();
 	create_heating_icon();
-	//lv_example_button_2();
 	create_layout_buttons_threshold();
 	create_button_reset();
     create_warning_icon();
@@ -743,24 +741,8 @@ void create_main_thermostat() {
 
     create_layout_schedule();
     create_label_text_mode();
-/*
-    create_instalation_button();
+    */
 
-
-
-    lv_update_time(12,5);
-    float number = 23.8;
-    lv_update_temperature(number);
-    lv_update_threshold_temperature(22.5);
-    lv_update_wifi_status(true);
-    lv_update_broker_status(true);
-    lv_update_heating(false);
-    lv_update_icon_errors(true);
-    lv_update_schedule(0, 100, 75);
-    lv_update_text_schedule(0, 100);
-    lv_update_percent(87);
-  */  
-   
 
 
 }

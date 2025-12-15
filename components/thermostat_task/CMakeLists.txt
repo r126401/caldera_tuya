@@ -3,6 +3,6 @@ idf_component_register(
     INCLUDE_DIRS 
     "include" 
     "../../src"
-    REQUIRES espressif__ds18b20 espressif__onewire_bus esp_driver_gpio
+    REQUIRES espressif__ds18b20 espressif__onewire_bus esp_driver_gpio events_app
     
 )

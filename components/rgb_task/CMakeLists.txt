@@ -13,8 +13,8 @@ idf_component_register(SRCS
 "images/ic_warning.c"
 "rgblcd.c"
 INCLUDE_DIRS 
-"include"
-REQUIRES lvgl__lvgl 
+"include" 
+REQUIRES lvgl__lvgl espressif__esp_lcd_touch atanisoft__esp_lcd_touch_xpt2046 events_app esp_app_format
 
 )
 

@@ -6,6 +6,8 @@
 # APP_PATH
 set(APP_PATH ${CMAKE_CURRENT_LIST_DIR})
 
+message(STATUS "Directorio = ${CMAKE_CURRENT_LIST_DIR}")
+
 # APP_NAME
 get_filename_component(APP_NAME ${APP_PATH} NAME)
 
@@ -30,4 +32,5 @@ target_sources(${EXAMPLE_LIB}
 target_include_directories(${EXAMPLE_LIB}
     PRIVATE
         ${APP_INC}
+        ${CMAKE_CURRENT_LIST_DIR}/components/tuya_interface/include
     )

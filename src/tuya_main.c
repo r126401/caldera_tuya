@@ -10,6 +10,7 @@
  * 2025-07-11   yangjie     Add cellular network support.
  */
 
+#include "tuya_interface.h"
 
 #include "cJSON.h"
 #include "netmgr.h"
@@ -52,6 +53,8 @@ tuya_iot_client_t client;
 
 /* Tuya license information (uuid authkey) */
 tuya_iot_license_t license;
+
+
 
 /**
  * @brief user defined log output api, in this demo, it will use uart0 as log-tx
@@ -292,11 +295,16 @@ void user_main(void)
     /* Start tuya iot task */
     tuya_iot_start(&client);
 
-    reset_netconfig_check();
+    int i;
+    i = reset_netconfig_check();
+    PR_INFO("RESET_NETCONFIG_CHECK: %d", i);
 
+    poner_semaforo();
+    //int i;
     for (;;) {
         /* Loop to receive packets, and handles client keepalive */
-        tuya_iot_yield(&client);
+        i = tuya_iot_yield(&client);
+        PR_INFO("Resultado: %d", i);
     }
 }
 

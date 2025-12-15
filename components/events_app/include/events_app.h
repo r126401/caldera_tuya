@@ -5,28 +5,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <esp_log.h>
-#include <esp_event.h>
-#include <nvs_flash.h>
-#include <esp_sntp.h>
-#include <esp_timer.h>
-#include <esp_err.h>
+#include <stdbool.h>
+
+//#include <esp_log.h>
+//#include <esp_event.h>
+//#include <nvs_flash.h>
+//#include <esp_sntp.h>
+//#include <esp_timer.h>
+//#include <esp_err.h>
 
 
-#include "esp_err.h"
-#include "esp_rmaker_core.h"
-#include <esp_rmaker_standard_types.h>
-#include <esp_rmaker_standard_params.h>
-#include <esp_rmaker_standard_devices.h>
-#include <esp_rmaker_schedule.h>
-#include <esp_rmaker_scenes.h>
-#include <esp_rmaker_console.h>
-#include <esp_rmaker_ota.h>
-#include <esp_rmaker_utils.h>
-
-#include "esp_rmaker_schedule.h"
+//#include "esp_err.h"
 
 
 
@@ -50,6 +39,55 @@ typedef struct event_app_t {
 } event_app_t;
 
 
+
+#define DEFAULT_POWER  false
+// Labels to params.
+#define DEFAULT_TEMPERATURE 21.0
+#define SETPOINT_TEMPERATURE "Umbral"
+#define CALIBRATE "Calibrado"
+#define READ_INTERVAL "intervalo de lectura"
+#define MARGIN_TEMPERATURE "margen de temperatura"
+#define ID_SENSOR "id_sensor"
+#define MODE_THERMOSTAT "Modo"
+#define NULSENSOR "Null"
+#define ALARM  "alarm"
+#define AUTO   "AUTO"
+#define SELECT_MODE "SELECTMODE"
+#define HEATING "Caldera"
+#define SCHEDULE "Schedule"
+#define STATS_HEATING "stats heating"
+
+#define TEXT_STATUS_APP_FACTORY "SIN CONFIGURAR"
+#define TEXT_STATUS_APP_ERROR "ERROR"
+#define TEXT_STATUS_APP_AUTO "AUTO"
+#define TEXT_STATUS_APP_MANUAL "MANUAL"
+#define TEXT_STATUS_APP_STARTING "INICIALIZANDO"
+#define TEXT_STATUS_APP_CONNECTING  "CONECTANDO"
+#define TEXT_STATUS_APP_SYNCING "SINCRONIZANDO"
+#define TEXT_STATUS_APP_UPGRADING "ACTUALIZANDO"
+#define TEXT_STATUS_APP_UNDEFINED "UNDEFINED"
+
+#define EVT_RGB_TASK (1 << 0)
+#define EVT_EVENT_TASK (1 << 1)
+#define EVT_THERMOSTAK_TASK (1 << 2)
+#define EVT_TUYA_TASK (1 << 3)
+
+
+typedef enum status_app_t {
+
+   STATUS_APP_FACTORY,
+   STATUS_APP_ERROR,
+   STATUS_APP_AUTO,
+   STATUS_APP_MANUAL,
+   STATUS_APP_STARTING,
+   STATUS_APP_CONNECTING,
+   STATUS_APP_SYNCING,
+   STATUS_APP_UPGRADING
+
+} status_app_t;
+
+
+
 void create_event_app_task();
 //void send_event_app(event_app_t event);
 void send_event_app_threshold(float threshold);
@@ -58,11 +96,14 @@ void send_event_app_time_valid();
 void send_event_app_status(EVENT_APP status);
 void send_event_app_factory();
 
+bool is_task_thermostat_active();
+char* status2mnemonic(status_app_t status);
+void set_app_update_threshold(float threshold, bool reporting);
+float get_app_current_temperature();
+float get_app_current_threshold();
+void set_app_status(status_app_t status);
+status_app_t get_app_status();
+char* get_device_name();
 
 
 
-
-
-
-esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_param_t *param,
-            const esp_rmaker_param_val_t val, void *priv_data, esp_rmaker_write_ctx_t *ctx);

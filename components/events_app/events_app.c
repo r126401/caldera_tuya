@@ -19,6 +19,10 @@ xQueueHandle event_queue_app;
 static const char *TAG = "events_app";
 //extern esp_rmaker_device_t *thermostat_device;
 extern float current_threshold;
+extern EventGroupHandle_t evt_between_task;
+
+
+
 
 
 
@@ -87,31 +91,6 @@ char* event_app_2mnemonic(EVENT_APP type) {
 
 
 
-void delay_get_schedules(void *arg) {
-
-    int index;
-    uint32_t time_end;
-    float threshold;
-
-    ESP_LOGW(TAG, "Vamos a chequear los schedules en la ultima tarea del arranque");
-
-    index = get_next_schedule(&time_end);
-    lv_update_schedule(true, time_end, index);
-    set_app_status(STATUS_APP_AUTO);
-    lv_enable_button_mode(true);
-    //sacamos el ultimo schedule para poner el threshold correspndiente en el arranque.
-    index = get_last_schedule(&time_end, &threshold);
-
-    if (index >= 0) {
-        set_app_update_threshold(threshold, true);
-        set_lcd_update_threshold_temperature(threshold);
-    }
-   
-
-
-}
-
-
 
 void receive_event_app(event_app_t event) {
 
@@ -124,48 +103,16 @@ void receive_event_app(event_app_t event) {
         case EVENT_APP_SETPOINT_THRESHOLD:
 
             ESP_LOGI(TAG, "Recibido evento EVENT_APP_SETPOINT_THRESHOLD. Threshold = %.1f", event.value); 
-            set_app_update_threshold(event.value, true);
             break;
 
 
         case EVENT_APP_TIME_VALID:
-            status_app = get_app_status();
-
-            if (status_app == STATUS_APP_UPGRADING) {
-                ESP_LOGW(TAG, "No se actualiza nada porque estamos en upgrading");
-            }
-
-            if ((status_app == STATUS_APP_STARTING) || status_app == (STATUS_APP_CONNECTING) || status_app == (STATUS_APP_SYNCING)) {
-                esp_timer_handle_t timer_delay_get_schedule;
-
-                const esp_timer_create_args_t delay_get_schedule_shot_timer_args = {
-                .callback = &delay_get_schedules,
-                /* name is optional, but may help identify the timer when debugging */
-                .name = "get schedule"
-                };
-                esp_timer_create(&delay_get_schedule_shot_timer_args, &timer_delay_get_schedule);
-                esp_timer_start_once(timer_delay_get_schedule, 10 * 1000000);
-            }
-
-            
+             
             break;
 
         case EVENT_APP_MANUAL:
             status_app = get_app_status();
 
-            if (status_app == STATUS_APP_AUTO) {
-                ESP_LOGW(TAG, "Vamos a cambiar al estado manual. Estamos en modo %s", status2mnemonic(status_app));
-                set_app_status(STATUS_APP_MANUAL);
-                if (get_status_relay() == OFF) {
-                    ESP_LOGW(TAG, "Vamos a encender porque estaba apagado");
-                    relay_operation(ON);
-                } else {
-                    ESP_LOGW(TAG, "Vamos a encender porque estaba encendido");
-                    relay_operation(OFF);
-                    }
-                }
-
-                lv_update_lcd_schedule(false);
 
 
             break;
@@ -174,15 +121,6 @@ void receive_event_app(event_app_t event) {
             status_app = get_app_status();
             ESP_LOGW(TAG, "Vamos a cambiar al estado AUTO. Estamos en modo %s", status2mnemonic(status_app));
 
-            if (status_app == STATUS_APP_MANUAL) {
-
-                set_app_status(STATUS_APP_AUTO);
-                set_lcd_update_threshold_temperature(current_threshold);
-                lv_update_lcd_schedule(true);
-                thermostat_action(get_app_current_temperature());
-
-                
-            }
         break;
 
         case EVENT_APP_ALARM_OFF:
@@ -204,10 +142,10 @@ void receive_event_app(event_app_t event) {
         break;
 
         case EVENT_APP_FACTORY:
-            create_instalation_button();
+            //create_instalation_button();
             set_app_status(STATUS_APP_FACTORY);
             //inhibimos el boton mode para que no se pueda cambiar de modo
-            lv_enable_button_mode(false);
+            //lv_enable_button_mode(false);
 
         break;
 
@@ -225,8 +163,10 @@ void event_app_task(void *arg) {
 
 	event_app_t event;
 
-
+    
+    xEventGroupWaitBits(evt_between_task, EVT_EVENT_TASK, pdFALSE, pdTRUE, portMAX_DELAY);
 	event_queue_app = xQueueCreate(10, sizeof(event_app_t));
+    xEventGroupSetBits(evt_between_task, EVT_THERMOSTAK_TASK);
 
 	for(;;) {
 		ESP_LOGI(TAG, "ESPERANDO EVENTO DE APLICACION...Memoria libre: %d", (int) esp_get_free_heap_size());
@@ -249,8 +189,8 @@ void create_event_app_task() {
 
 
 
-	xTaskCreatePinnedToCore(event_app_task, "event_app_task", CONFIG_RESOURCE_EVENT_TASK, NULL, 0, NULL,0);
-	ESP_LOGW(TAG, "TAREA DE EVENTOS DE APLICACION CREADA CREADA");
+	xTaskCreate(event_app_task, "event_app_task", 3072, NULL, 0, NULL);
+	ESP_LOGW(TAG, "TAREA DE EVENTOS DE APLICACION CREADA");
 
 
 }
@@ -328,11 +268,114 @@ void send_event_app_factory() {
 
 
 
+void set_app_status(status_app_t status) {
+
+
+    char* text_status;
+
+    text_status = status2mnemonic(status);
+
+    ESP_LOGW(TAG," ESTADO DE LA APLICACION: %s", text_status);
+    set_lcd_update_text_mode(text_status);
+
+
+
+    switch(status) {
+
+        case STATUS_APP_FACTORY:
+        
+        break;
+
+        case STATUS_APP_ERROR:
+        break;
+
+        case STATUS_APP_AUTO:
+        break;
+        case STATUS_APP_MANUAL:
+        break;
+
+        case STATUS_APP_STARTING:
+        break;
+
+        case STATUS_APP_CONNECTING:
+        break;
+
+        case STATUS_APP_SYNCING:
+        break;
+
+        case STATUS_APP_UPGRADING:
+        break;
+
+
+
+        default:
+        break;
 
 
 
 
+    }
+}
 
+char* status2mnemonic(status_app_t status) {
+
+    static char mnemonic[30];
+
+    switch(status) {
+
+        case STATUS_APP_FACTORY:
+            strncpy(mnemonic, TEXT_STATUS_APP_FACTORY, 30);
+        break;
+
+        case STATUS_APP_ERROR:
+            strncpy(mnemonic, TEXT_STATUS_APP_ERROR, 30);
+        break;
+
+        case STATUS_APP_AUTO:
+           strncpy(mnemonic, TEXT_STATUS_APP_AUTO, 30);
+        break;
+        case STATUS_APP_MANUAL:
+           strncpy(mnemonic, TEXT_STATUS_APP_MANUAL, 30);
+
+        break;
+
+        case STATUS_APP_STARTING:
+           strncpy(mnemonic, TEXT_STATUS_APP_STARTING, 30);
+
+        break;
+
+        case STATUS_APP_CONNECTING:
+           strncpy(mnemonic, TEXT_STATUS_APP_CONNECTING, 30);
+
+        break;
+
+        case STATUS_APP_SYNCING:
+           strncpy(mnemonic, TEXT_STATUS_APP_SYNCING, 30);
+
+        break;
+
+        case STATUS_APP_UPGRADING:
+           strncpy(mnemonic, TEXT_STATUS_APP_UPGRADING, 30);
+
+        break;
+
+        default:
+            strncpy(mnemonic, "ERROR STATUS", 30);
+
+        break;
+
+    }
+
+    return mnemonic;
+
+
+}
+
+
+status_app_t get_app_status() {
+
+    return STATUS_APP_ERROR;
+}
 
 
 

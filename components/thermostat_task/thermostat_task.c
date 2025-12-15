@@ -15,9 +15,14 @@
 #include "esp_log.h"
 
 #include "tuya_config.h"
+#include "events_app.h"
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/queue.h>
 
 
-
+extern EventGroupHandle_t evt_between_task;
 
 
 
@@ -289,9 +294,11 @@ static void task_iotThermostat()
 	//event_lcd_t event;
 	//event.event_type = UPDATE_TEMPERATURE;
 
-    ESP_LOGI(TAG, "Ya estamos ejecutando la task del termostato");
+    
 
-
+    xEventGroupWaitBits(evt_between_task, EVT_THERMOSTAK_TASK, pdFALSE, pdTRUE, portMAX_DELAY);
+    ESP_LOGI(TAG, "Arrancamos la task del termostato");
+    //xEventGroupSetBits(evt_between_task, EVT_RGB_TASK);
 	/**
 	 * init driver ds18b20
 	 */
